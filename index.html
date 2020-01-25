@@ -141,9 +141,23 @@
                 breed();
             }
 
-            setTimeout(function() {
-                requestAnimationFrame(draw);
-            }, 10);
+            var success = true;
+            for (var i = 0; i < balls.length; i++) {
+                if (balls[i].genesNeededToHole == null) {
+                    success = false;
+                    break;
+                }
+            }
+
+            if (success) {
+                alert('everyone found the hole!');
+            }
+            else {
+                setTimeout(function() {
+                    requestAnimationFrame(draw);
+                }, 10);
+            }
+            
         }
 
         function breed() {
