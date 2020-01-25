@@ -107,7 +107,7 @@
         var generationNumber = 1;
         var ballCount = 50;
 
-        var hole = new Hole(25, 50, 50)
+        var hole = new Hole(25, Math.random() * canvas.width, Math.random() * canvas.height)
 
         var balls = [];
         for (var i = 0; i < ballCount; i++) {
