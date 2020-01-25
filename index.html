@@ -64,11 +64,15 @@
                 this.genesNeededToHole = null;
             }
 
+            mutate(i) {
+                this.DNA[i].dx = getRandomMovement();
+                this.DNA[i].dy = getRandomMovement();
+            }
+
             move(i) {
                 if (this.genesNeededToHole == null) {
-                    if (this.DNA[i].dx == 0 && this.DNA[i].dy == 0) { //mutate
-                        this.DNA[i].dx = getRandomMovement();
-                        this.DNA[i].dy = getRandomMovement();
+                    if (this.DNA[i].dx == 0 && this.DNA[i].dy == 0) {
+                        this.mutate(i);
                     }
                     this.x += this.DNA[i].dx;
                     this.y += this.DNA[i].dy;
@@ -102,7 +106,7 @@
         var canvas = document.getElementById("myCanvas");
         var ctx = canvas.getContext("2d");
 
-        var numberOfGenes = 100;
+        var numberOfGenes = 200;
         var geneNumber = 0;
         var generationNumber = 1;
         var ballCount = 50;
@@ -197,6 +201,9 @@
 
                 for (var j = 0; j < numberOfGenes; j++) {
                     baby.DNA.push(Math.random() < 0.5 ? mother.DNA[j] : father.DNA[j]);
+                    if (Math.random() < 0.0001){
+                        baby.mutate(j);
+                    }
                 }
 
                 balls.push(baby);
