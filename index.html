@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Get in the Hole!</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        canvas {
+            background:#eee;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .centered {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+     
+    <h1 class="centered">Get in the Hole!</h1>
+    <div class="centered">
+        Generation: <span id="generationNumber"></span>
+    </div>
+    </br>
+    <canvas id="myCanvas" width="700" height="500"></canvas>
+     
+    <script>
+        class Hole {
+            constructor(radius, x, y) {
+                this.radius = radius;
+                this.x = x;
+                this.y = y;
+            }
+
+            draw(ctx) {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = "rgb(0,0,0)";
+                ctx.fill();
+                ctx.closePath();
+            }
+        }
+
+        class Gene {
+            constructor(dx, dy) {
+                this.dx = dx;
+                this.dy = dy;
+            }
+        }
+
+        class Ball {
+            constructor(radius, x, y) {
+                this.radius = radius;
+                this.x = x;
+                this.y = y;
+                this.DNA = [];
+                this.genesNeededToHole = null;
+            }
+
+            move(i) {
+                if (this.genesNeededToHole == null) {
+                    this.x += this.DNA[i].dx;
+                    this.y += this.DNA[i].dy;
+                }
+                else {
+                    this.DNA[i].dx = 0;
+                    this.DNA[i].dy = 0;
+                }
+            }
+
+            draw(ctx) {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = "rgba(0,255,0, 0.2)";
+                ctx.fill();
+                ctx.closePath();
+            }
+
+            distanceFromHole(hole) {
+                return Math.pow(Math.pow(this.x - hole.x, 2) + Math.pow(this.y - hole.y, 2), 0.5);
+            }
+
+            fitness(hole) {
+                var closenessFactor = this.distanceFromHole(hole);
+                var quicknessFactor = this.genesNeededToHole == null ? this.DNA.length : this.genesNeededToHole;
+                var result = 1 / closenessFactor * quicknessFactor;
+                return result;
+            }
+        }
+
+        var canvas = document.getElementById("myCanvas");
+        var ctx = canvas.getContext("2d");
+
+        var numberOfGenes = 300;
+        var geneNumber = 0;
+        var generationNumber = 1;
+        var ballCount = 50;
+
+        var hole = new Hole(25, 50, 50)
+
+        var balls = [];
+        for (var i = 0; i < ballCount; i++) {
+            var ball = new Ball(10, canvas.width / 2, canvas.height / 2);
+
+            for (var j = 0; j < numberOfGenes; j++) {
+                    var dx = Math.random() * 10 * (Math.random() < 0.5 ? -1 : 1);
+                    var dy = Math.random() * 10 * (Math.random() < 0.5 ? -1 : 1);
+                    ball.DNA.push(new Gene(dx,dy));
+            }
+
+            balls.push(ball);
+        }
+
+        function draw() {
+            document.getElementById("generationNumber").innerHTML = generationNumber;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            hole.draw(ctx);
+
+            for (var i = 0; i < balls.length; i++) {
+                balls[i].draw(ctx);
+
+                if (balls[i].distanceFromHole(hole) < hole.radius - balls[i].radius) {
+                    balls[i].genesNeededToHole = geneNumber;
+                }
+
+                balls[i].move(geneNumber);
+            }
+
+            geneNumber++;
+
+            if (geneNumber == numberOfGenes) {
+                geneNumber = 0;
+                generationNumber++;
+                breed();
+            }
+
+            setTimeout(function() {
+                requestAnimationFrame(draw);
+            }, 10);
+        }
+
+        function breed() {
+            var chances = [];
+            var totalFitness = 0;
+            var genePool = [];
+
+            for (var i = 0; i < balls.length; i++) {
+                var f = balls[i].fitness(hole);
+                chances.push(f);
+                totalFitness += f;
+            }
+
+            for (var i = 0; i < chances.length; i++) {
+                chances[i] = Math.floor(chances[i] / totalFitness * 100);
+            }
+
+            for (var i = 0; i < balls.length; i++) {
+                for (var j = 0; j < chances[i]; j++) {
+                    genePool.push(balls[i]);
+                }
+            }
+
+            balls = [];
+            for (var i = 0; i < ballCount; i++) {
+                var father = genePool[Math.floor(Math.random() * genePool.length)];
+                var mother = genePool[Math.floor(Math.random() * genePool.length)];
+                var baby = new Ball(10, canvas.width / 2, canvas.height / 2);
+
+                for (var j = 0; j < numberOfGenes; j++) {
+                    baby.DNA.push(Math.random() < 0.5 ? mother.DNA[j] : father.DNA[j]);
+                }
+
+                balls.push(baby);
+            }
+        }
+        
+        draw();
+    </script>
+     
+</body>
+
+</html>
