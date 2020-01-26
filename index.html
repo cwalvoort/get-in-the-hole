@@ -97,7 +97,7 @@
 
             fitness(hole) {
                 var closenessFactor = this.distanceFromHole(hole);
-                var quicknessFactor = this.genesNeededToHole == null ? this.DNA.length : this.genesNeededToHole;
+                var quicknessFactor = this.genesNeededToHole == null ? Math.pow(this.DNA.length, 2) : this.genesNeededToHole;
                 var result = 1 / closenessFactor * quicknessFactor;
                 return result;
             }
@@ -114,16 +114,22 @@
         var hole = new Hole(25, Math.random() * canvas.width, Math.random() * canvas.height)
 
         var balls = [];
-        for (var i = 0; i < ballCount; i++) {
-            var ball = new Ball(10, canvas.width / 2, canvas.height / 2);
 
-            for (var j = 0; j < numberOfGenes; j++) {
-                    var dx = getRandomMovement();
-                    var dy = getRandomMovement();
-                    ball.DNA.push(new Gene(dx,dy));
+        initializeBalls();
+        draw();
+
+        function initializeBalls() {
+            for (var i = 0; i < ballCount; i++) {
+                var ball = new Ball(10, canvas.width / 2, canvas.height / 2);
+
+                for (var j = 0; j < numberOfGenes; j++) {
+                        var dx = getRandomMovement();
+                        var dy = getRandomMovement();
+                        ball.DNA.push(new Gene(dx,dy));
+                }
+
+                balls.push(ball);
             }
-
-            balls.push(ball);
         }
 
         function getRandomMovement() {
@@ -209,8 +215,6 @@
                 balls.push(baby);
             }
         }
-        
-        draw();
     </script>
      
 </body>
